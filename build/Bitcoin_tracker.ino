@@ -2,8 +2,8 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
-const char* ssid = "X";
-const char* password = "12345678";
+const char* ssid = "ssid";
+const char* password = "password";
 
 void fetchAndSendBTCData() {
   HTTPClient http;
