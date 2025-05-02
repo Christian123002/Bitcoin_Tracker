@@ -3,8 +3,8 @@
 #include <ArduinoJson.h>
 
 // === WiFi Credentials ===
-const char* ssid = "CHKLINW";
-const char* password = "Caar1980";
+const char* ssid = "ssid"; 
+const char* password = "password";
 
 void setup() {
   Serial.begin(115200);
