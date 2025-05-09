@@ -1,4 +1,61 @@
-//Main.c
+/**
+ * @file main.c
+ * @brief TM4C123GH6PM: On startup, allow the user to set a threshold via a push button.
+ * Then, in normal operation, receive API data via UART1, display BTC price & 24h change on a 16x2 LCD,
+ * and drive an RGB LED accordingly.
+ *
+ * Threshold Setting Mode (Startup):
+ *   - The LCD displays:
+ *         Line 1: "Set Threshold"
+ *         Line 2: "$%d0,000"   (e.g., "$70,000" when the adjustable digit is 7)
+ *   - The adjustable digit (ranging from 1–9) is changed by pressing PF4.
+ *   - The system waits 4 seconds; each button press increments the digit (cycling 1?2?…?9?1).
+ *   - After 4 seconds of no press, the threshold is locked as:
+ *         local_threshold = adjustable_digit * 10000
+ *   - Then, the LCD shows "Threshold set" for 3 seconds before entering normal operation.
+ *
+ * Normal Operation:
+ *   - The ESP32 sends API messages over UART1 (to PB0) formatted as:
+ *         "BTC Price: $<price>, 24h Change: <change>%\n"
+ *   - The TM4C parses the price and 24h change.
+ *         • If the price is below the threshold (and the alarm is active), then the LCD shows on
+ *           row 1 the current price (formatted, e.g. "$8,713") and on row 2 "BUY NOW". The RGB LED
+ *           flashes yellow (by toggling red and green). Pressing PF4 stops the alarm.
+ *         • Otherwise, the LCD displays "BTC Price:" on row 1 and the formatted price and change on row 2,
+ *           with the RGB LED set based on the change (green if positive, red if negative, off if near zero).
+ *
+ * Connections:
+ *
+ * LCD (HD44780, 16x2, 4-bit mode):
+ *   VSS ? GND
+ *   VDD ? +5V
+ *   V0  ? Potentiometer wiper (contrast adjust)
+ *   RS  ? PE0
+ *   RW  ? GND (write-only)
+ *   E   ? PC6
+ *   DB4 ? PA2
+ *   DB5 ? PA3
+ *   DB6 ? PA4
+ *   DB7 ? PA5
+ *   A   ? +5V via resistor (~22O or two 10O in series)
+ *   K   ? GND
+ *
+ * UART1 (TM4C):
+ *   ESP32 TX ? UART1 RX (PB0)
+ *
+ * RGB LED (Common-cathode):
+ *   Red anode   ? PD0 via ~220O resistor
+ *   Green anode ? PD1 via ~220O resistor
+ *   Common cathode ? GND
+ *
+ * Push Button (Set Threshold / Stop Alarm):
+ *   One terminal ? PF4 (input with internal pull-up; active low)
+ *   Other terminal ? GND
+ *
+ * Assumptions:
+ *   - System clock = 50 MHz.
+ *   - UART b
+ */
 #include "tracker.h"          
 #include <stdio.h>               
 
